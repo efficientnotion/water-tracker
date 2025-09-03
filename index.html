@@ -803,14 +803,24 @@
             saveData();
         }
 
-        // 초기화
+         // 초기화 함수 수정
         function resetWater() {
-            if (confirm('Reset today\'s progress?')) {
-                currentAmount = 0;
-                updateDisplay();
-                saveData();
-            }
+        if (confirm('Reset today\'s progress?')) {
+        // 현재 데이터를 히스토리에 먼저 저장
+        if (currentAmount > 0) {
+            const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
+            const todayStr = new Date().toISOString().slice(0, 10);
+            history[todayStr] = currentAmount;
+            localStorage.setItem('waterHistory', JSON.stringify(history));
         }
+        
+        // 그 다음 초기화
+        currentAmount = 0;
+        updateDisplay();
+        saveData();
+    }
+}
+
 
         // 축하 애니메이션
         function showCelebration() {
