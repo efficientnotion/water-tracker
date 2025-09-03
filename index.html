@@ -1,424 +1,182 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>물 마시기 트래커</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 100%;
-        }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        
-        .date {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .water-goal {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .goal-text {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        
-        .goal-amount {
-            font-size: 32px;
-            font-weight: bold;
-            color: #4a90e2;
-        }
-        
-        .progress-container {
-            background: #f0f0f0;
-            border-radius: 15px;
-            height: 30px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4a90e2, #667eea);
-            border-radius: 15px;
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-        }
-        
-        .progress-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            line-height: 30px;
-            color: #333;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .cups-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .cup {
-            aspect-ratio: 1;
-            background: #f0f0f0;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .cup.filled {
-            background: linear-gradient(135deg, #4a90e2, #667eea);
-            border-color: #4a90e2;
-        }
-        
-        .cup:hover {
-            transform: scale(1.05);
-        }
-        
-        .cup-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-        
-        .cup-amount {
-            font-size: 12px;
-            color: #666;
-            font-weight: bold;
-        }
-        
-        .cup.filled .cup-amount {
-            color: white;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-add {
-            background: #4a90e2;
-            color: white;
-        }
-        
-        .btn-add:hover {
-            background: #357abd;
-        }
-        
-        .btn-reset {
-            background: #f0f0f0;
-            color: #666;
-        }
-        
-        .btn-reset:hover {
-            background: #e0e0e0;
-        }
-        
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 100px;
-            animation: celebrate 1s ease;
-            pointer-events: none;
-            z-index: 1000;
-        }
-        
-        @keyframes celebrate {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>물 마시기 출렁임 위젯</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    height: 100vh;
+    background: #f0f4fb;
+  }
+  .tracker {
+    background: white;
+    border-radius: 28px;
+    box-shadow: 0 10px 20px rgba(66, 133, 244,0.15);
+    width: 280px;
+    padding: 25px;
+    text-align: center;
+  }
+  .title {
+    font-weight: 600;
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #334155;
+  }
+  .goal-text {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+  .water-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 0 auto 25px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.05);
+  }
+
+  /* 출렁이는 물 */
+  .wave {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 200%;
+    background: #4a90e2;
+    border-radius: 40%;
+    animation: waveAnimation 4s infinite linear;
+    opacity: 0.5;
+    transform: translate3d(0,0,0);
+  }
+  .wave:nth-child(2) {
+    animation-delay: -2s;
+    opacity: 0.7;
+    background: #357abd;
+  }
+
+  .water-fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: #4a90e2;
+    border-radius: 0 0 90px 90px;
+    overflow: hidden;
+    transition: height 1s ease;
+  }
+  .water-fill svg {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 200%;
+    animation: waveAnimation 4s infinite linear;
+  }
+  .water-fill svg:nth-child(2) {
+    animation-delay: -2s;
+  }
+
+  /* 물결 애니메이션 */
+  @keyframes waveAnimation {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* 버튼 스타일 */
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+  button {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 10px 25px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #357abd;
+  }
+
+  .stats {
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #334155;
+  }
+  .subtitle {
+    margin-top: 5px;
+    font-weight: 400;
+    font-size: 14px;
+    color: #64748b;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>💧 오늘의 수분 섭취</h1>
-        <div class="date" id="currentDate"></div>
-        
-        <div class="water-goal">
-            <div class="goal-text">일일 목표</div>
-            <div class="goal-amount"><span id="currentAmount">0</span> / <span id="goalAmount">2000</span>ml</div>
-        </div>
-        
-        <div class="progress-container">
-            <div class="progress-bar" id="progressBar"></div>
-            <div class="progress-text" id="progressText">0%</div>
-        </div>
-        
-        <div class="cups-container" id="cupsContainer">
-            <!-- 컵들이 동적으로 생성됩니다 -->
-        </div>
-        
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-label">남은 양</div>
-                <div class="stat-value"><span id="remaining">2000</span>ml</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">마신 컵</div>
-                <div class="stat-value"><span id="cupCount">0</span>/8</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">달성률</div>
-                <div class="stat-value"><span id="achievement">0</span>%</div>
-            </div>
-        </div>
-        
-        <div class="buttons">
-            <button class="btn btn-add" onclick="addCustomAmount()">➕ 직접 입력</button>
-            <button class="btn btn-reset" onclick="resetTracker()">🔄 초기화</button>
-        </div>
-    </div>
-    
-    <script>
-        // 로컬 스토리지 키
-        const STORAGE_KEY = 'waterTracker';
-        const TODAY_KEY = 'waterTrackerDate';
-        
-        // 상태 관리
-        let state = {
-            goal: 2000,
-            current: 0,
-            cups: Array(8).fill(false),
-            cupSize: 250
-        };
-        
-        // 초기화
-        function init() {
-            loadState();
-            checkNewDay();
-            updateDate();
-            renderCups();
-            updateDisplay();
-        }
-        
-        // 날짜 표시
-        function updateDate() {
-            const date = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            document.getElementById('currentDate').textContent = date.toLocaleDateString('ko-KR', options);
-        }
-        
-        // 새로운 날 체크
-        function checkNewDay() {
-            const today = new Date().toDateString();
-            const savedDate = localStorage.getItem(TODAY_KEY);
-            
-            if (savedDate !== today) {
-                state = {
-                    goal: 2000,
-                    current: 0,
-                    cups: Array(8).fill(false),
-                    cupSize: 250
-                };
-                localStorage.setItem(TODAY_KEY, today);
-                saveState();
-            }
-        }
-        
-        // 상태 저장
-        function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-        
-        // 상태 불러오기
-        function loadState() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                state = JSON.parse(saved);
-            }
-        }
-        
-        // 컵 렌더링
-        function renderCups() {
-            const container = document.getElementById('cupsContainer');
-            container.innerHTML = '';
-            
-            state.cups.forEach((filled, index) => {
-                const cup = document.createElement('div');
-                cup.className = `cup ${filled ? 'filled' : ''}`;
-                cup.onclick = () => toggleCup(index);
-                cup.innerHTML = `
-                    <div class="cup-icon">🥤</div>
-                    <div class="cup-amount">${state.cupSize}ml</div>
-                `;
-                container.appendChild(cup);
-            });
-        }
-        
-        // 컵 토글
-        function toggleCup(index) {
-            if (state.cups[index]) {
-                // 이미 채워진 컵 클릭 시, 해당 컵부터 뒤의 모든 컵 비우기
-                for (let i = index; i < state.cups.length; i++) {
-                    if (state.cups[i]) {
-                        state.cups[i] = false;
-                        state.current -= state.cupSize;
-                    }
-                }
-            } else {
-                // 빈 컵 클릭 시, 처음부터 해당 컵까지 모두 채우기
-                for (let i = 0; i <= index; i++) {
-                    if (!state.cups[i]) {
-                        state.cups[i] = true;
-                        state.current += state.cupSize;
-                    }
-                }
-            }
-            
-            // 목표 달성 체크
-            if (state.current >= state.goal) {
-                celebrate();
-            }
-            
-            saveState();
-            renderCups();
-            updateDisplay();
-        }
-        
-        // 디스플레이 업데이트
-        function updateDisplay() {
-            const percentage = Math.min((state.current / state.goal) * 100, 100);
-            
-            document.getElementById('currentAmount').textContent = state.current;
-            document.getElementById('progressBar').style.width = percentage + '%';
-            document.getElementById('progressText').textContent = Math.round(percentage) + '%';
-            document.getElementById('remaining').textContent = Math.max(state.goal - state.current, 0);
-            document.getElementById('cupCount').textContent = state.cups.filter(c => c).length;
-            document.getElementById('achievement').textContent = Math.round(percentage);
-        }
-        
-        // 직접 입력
-        function addCustomAmount() {
-            const amount = prompt('마신 물의 양을 입력하세요 (ml):', '200');
-            if (amount && !isNaN(amount) && amount > 0) {
-                state.current += parseInt(amount);
-                
-                // 컵 상태 업데이트
-                const filledCups = Math.min(Math.floor(state.current / state.cupSize), 8);
-                for (let i = 0; i < filledCups; i++) {
-                    state.cups[i] = true;
-                }
-                
-                if (state.current >= state.goal) {
-                    celebrate();
-                }
-                
-                saveState();
-                renderCups();
-                updateDisplay();
-            }
-        }
-        
-        // 초기화
-        function resetTracker() {
-            if (confirm('정말 초기화하시겠습니까?')) {
-                state.current = 0;
-                state.cups = Array(8).fill(false);
-                saveState();
-                renderCups();
-                updateDisplay();
-            }
-        }
-        
-        // 축하 애니메이션
-        function celebrate() {
-            const celebration = document.createElement('div');
-            celebration.className = 'celebration';
-            celebration.textContent = '🎉';
-            document.body.appendChild(celebration);
-            
-            setTimeout(() => {
-                celebration.remove();
-            }, 1000);
-        }
-        
-        // 시작
-        init();
-        
-        // 자정에 자동 리셋
-        setInterval(checkNewDay, 60000); // 1분마다 체크
-    </script>
+<div class="tracker">
+  <div class="title">💧 물 마시기 트래커</div>
+  <div class="water-container">
+    <div class="water-fill" id="waterFill"></div>
+    <div class="wave" style="bottom: 10%;"></div>
+    <div class="wave" style="bottom: 15%; animation-duration: 6s;"></div>
+  </div>
+
+  <div class="stats" id="statsText">0 ml / 2000 ml</div>
+  <div class="subtitle" id="percentText">0% 달성</div>
+
+  <div class="buttons">
+    <button onclick="addWater()">한 컵 추가 (250ml)</button>
+    <button onclick="resetWater()" style="background:#e53e3e;">초기화</button>
+  </div>
+</div>
+
+<script>
+  const maxGoal = 2000;
+  const cupSize = 250;
+  const waterFill = document.getElementById('waterFill');
+  const statsText = document.getElementById('statsText');
+  const percentText = document.getElementById('percentText');
+
+  let currentWater = 0;
+
+  function updateWater() {
+    if(currentWater > maxGoal) currentWater = maxGoal;
+    let percent = (currentWater / maxGoal) * 100;
+
+    waterFill.style.height = percent + '%';
+    statsText.textContent = `${currentWater} ml / ${maxGoal} ml`;
+    percentText.textContent = `${Math.round(percent)}% 달성`;
+  }
+
+  function addWater(){
+    if(currentWater + cupSize <= maxGoal){
+      currentWater += cupSize;
+      updateWater();
+    }
+  }
+  function resetWater(){
+    currentWater = 0;
+    updateWater();
+  }
+
+  // 초기 표시
+  updateWater();
+</script>
 </body>
 </html>
