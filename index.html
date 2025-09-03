@@ -575,6 +575,11 @@
     </div>
 
     <script>
+        // ⭐ 페이지별 독립 저장소 설정
+        const PAGE_ID = btoa(window.location.href);
+        const STORAGE_KEY = 'waterTrackerData_' + PAGE_ID;
+        const HISTORY_KEY = 'waterHistory_' + PAGE_ID;
+
         // 변수 선언
         let currentAmount = 0;
         let goalAmount = 2000;
@@ -598,7 +603,7 @@
 
         // 데이터 로드
         function loadData() {
-            const saved = localStorage.getItem('waterTrackerData');
+            const saved = localStorage.getItem(STORAGE_KEY); // ⭐ 수정됨
             if (saved) {
                 const data = JSON.parse(saved);
                 currentAmount = data.currentAmount || 0;
@@ -636,18 +641,18 @@
                 showStats,
                 lastResetDate
             };
-            localStorage.setItem('waterTrackerData', JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); // ⭐ 수정됨
         }
 
         // 히스토리 저장
         function saveHistory() {
             if (currentAmount > 0) {
-                const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); // ⭐ 수정됨
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
                 const dateStr = yesterday.toISOString().slice(0, 10);
                 history[dateStr] = currentAmount;
-                localStorage.setItem('waterHistory', JSON.stringify(history));
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); // ⭐ 수정됨
             }
         }
 
@@ -674,7 +679,7 @@
 
         // 차트 그리기
         function drawChart() {
-            const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); // ⭐ 수정됨
             chart.innerHTML = '';
             chartLabels.innerHTML = '';
             
@@ -803,24 +808,23 @@
             saveData();
         }
 
-         // 초기화 함수 수정
+        // 초기화 함수 수정
         function resetWater() {
-        if (confirm('Reset today\'s progress?')) {
-        // 현재 데이터를 히스토리에 먼저 저장
-        if (currentAmount > 0) {
-            const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
-            const todayStr = new Date().toISOString().slice(0, 10);
-            history[todayStr] = currentAmount;
-            localStorage.setItem('waterHistory', JSON.stringify(history));
+            if (confirm('Reset today\'s progress?')) {
+                // 현재 데이터를 히스토리에 먼저 저장
+                if (currentAmount > 0) {
+                    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}'); // ⭐ 수정됨
+                    const todayStr = new Date().toISOString().slice(0, 10);
+                    history[todayStr] = currentAmount;
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); // ⭐ 수정됨
+                }
+                
+                // 그 다음 초기화
+                currentAmount = 0;
+                updateDisplay();
+                saveData();
+            }
         }
-        
-        // 그 다음 초기화
-        currentAmount = 0;
-        updateDisplay();
-        saveData();
-    }
-}
-
 
         // 축하 애니메이션
         function showCelebration() {
