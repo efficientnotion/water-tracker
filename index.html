@@ -154,7 +154,7 @@
         }
 
         .btn-add:hover {
-            background: #7494f2;
+            background: #5678d8;
         }
 
         .btn-reset {
@@ -164,6 +164,7 @@
 
         .btn-reset:hover {
             background: #e5e7eb;
+            color: #4b5563;
         }
 
         .goal-setting {
@@ -189,7 +190,7 @@
         .goal-input:focus {
             outline: none;
             border-color: #7494f2;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 0 0 3px rgba(116, 148, 242, 0.1);
         }
 
         .stats {
@@ -219,22 +220,6 @@
             50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
             100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
         }
-
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-
-        @keyframes ripple {
-            to {
-                transform: scale(2.5);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
@@ -242,8 +227,8 @@
         <div class="header">
             <div class="icon">💧</div>
             <div class="header-text">
-                <div class="amount" id="amountText">0 Liters</div>
-                <div class="goal-text" id="goalPercent">0% of your goal</div>
+                <div class="amount" id="amountText">Water Tracking</div>
+                <div class="goal-text" id="goalPercent">0L / 2.0L (0%)</div>
             </div>
         </div>
 
@@ -305,24 +290,6 @@
             localStorage.setItem('waterTracker', JSON.stringify(data));
         }
 
-        // 리플 효과
-        function createRipple(e) {
-            const button = e.currentTarget;
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = e.clientX - rect.left - size / 2;
-            const y = e.clientY - rect.top - size / 2;
-            
-            const ripple = document.createElement('span');
-            ripple.classList.add('ripple');
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            
-            button.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        }
-
         // 물 추가
         function addWater() {
             currentAmount += 250;
@@ -369,8 +336,8 @@
             document.getElementById('percentage').textContent = `${Math.round(percentage)}%`;
             
             // 헤더 업데이트
-            document.getElementById('amountText').textContent = `${liters} Liters`;
-            document.getElementById('goalPercent').textContent = `${Math.round(percentage)}% of your goal`;
+            document.getElementById('amountText').textContent = `Water Tracking`;
+            document.getElementById('goalPercent').textContent = `${liters}L / ${(goalAmount/1000).toFixed(1)}L (${Math.round(percentage)}%)`;
             
             // 상태 메시지 업데이트
             const remaining = Math.max(goalAmount - currentAmount, 0);
@@ -408,7 +375,6 @@
         // 이벤트 리스너
         document.getElementById('goalInput').addEventListener('change', updateGoal);
         document.getElementById('goalInput').addEventListener('input', updateGoal);
-        document.getElementById('addBtn').addEventListener('click', createRipple);
 
         // 초기화
         loadData();
