@@ -12,7 +12,7 @@
         }
 
         body {
-            background: #ffffff;
+            background: #f6f6f6;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             display: flex;
             justify-content: center;
@@ -334,4 +334,575 @@
             justify-content: center;
         }
 
-        .water-clo
+        .water-close-btn:hover {
+            color: #333;
+        }
+
+        .water-modal-body {
+            padding: 24px;
+        }
+
+        .water-settings-section {
+            margin-bottom: 24px;
+        }
+
+        .water-settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .water-settings-section h4 {
+            margin: 0 0 16px;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .water-setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .water-setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .water-setting-item label {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .water-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .water-input-group input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .water-input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #16b8f3;
+        }
+
+        .water-input-group span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .water-toggle-switch {
+            width: 44px;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 12px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .water-toggle-switch:checked {
+            background: #16b8f3;
+        }
+
+        .water-toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .water-toggle-switch:checked::before {
+            transform: translateX(20px);
+        }
+
+        .water-modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .water-save-btn {
+            background: #16b8f3;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .water-save-btn:hover {
+            background: #0ea5e9;
+        }
+
+        /* 축하 애니메이션 */
+        .water-celebration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .water-celebration.show {
+            animation: celebrate 1s ease-out;
+        }
+
+        @keyframes celebrate {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-180deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+            }
+        }
+
+        .water-week-display {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="water-tracker-container" id="waterTrackerContainer">
+        <!-- HTML이 JS에서 생성됩니다 -->
+    </div>
+
+    <script>
+    (function() {
+        // 고유 ID 생성 - 타임스탬프 + 랜덤 문자열
+        const WIDGET_UNIQUE_ID = 'water_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // 페이지 URL 기반 ID (더 안정적)
+        const PAGE_ID = btoa(encodeURIComponent(window.location.href + '_' + WIDGET_UNIQUE_ID));
+        const STORAGE_KEY = 'waterTracker_' + PAGE_ID;
+        const HISTORY_KEY = 'waterHistory_' + PAGE_ID;
+
+        // HTML 생성
+        const container = document.getElementById('waterTrackerContainer');
+        container.innerHTML = `
+            <!-- 메인 위젯 -->
+            <div class="water-widget-box">
+                <button class="water-settings-btn" data-widget="${WIDGET_UNIQUE_ID}">&#9881;</button>
+
+                <div class="water-circle-container">
+                    <div class="water-circle-bg">
+                        <div class="water-fill" id="water_${WIDGET_UNIQUE_ID}"></div>
+                    </div>
+                    <div class="water-display-container">
+                        <div class="water-amount-display" id="amountDisplay_${WIDGET_UNIQUE_ID}">0.0L</div>
+                        <div class="water-status" id="status_${WIDGET_UNIQUE_ID}">● Daily Goal</div>
+                    </div>
+                    <div class="water-celebration" id="celebration_${WIDGET_UNIQUE_ID}">💧</div>
+                </div>
+
+                <div class="water-controls">
+                    <button class="water-add-btn" data-widget="${WIDGET_UNIQUE_ID}" title="Add water">&#43;</button>
+                    <button class="water-minus-btn" data-widget="${WIDGET_UNIQUE_ID}" title="Remove water">&#8722;</button>
+                    <button class="water-reset-btn" data-widget="${WIDGET_UNIQUE_ID}" title="Reset">&#8635;</button>
+                </div>
+            </div>
+
+            <!-- 통계 박스 -->
+            <div class="water-stats-box" id="statsBox_${WIDGET_UNIQUE_ID}">
+                <div class="water-stats-header">
+                    <button class="water-nav-btn water-prev-week" data-widget="${WIDGET_UNIQUE_ID}">&#8592;</button>
+                    <span class="water-week-display" id="weekDisplay_${WIDGET_UNIQUE_ID}">This Week</span>
+                    <button class="water-nav-btn water-next-week" data-widget="${WIDGET_UNIQUE_ID}">&#8594;</button>
+                </div>
+                <div class="water-chart" id="chart_${WIDGET_UNIQUE_ID}"></div>
+                <div class="water-chart-labels" id="chartLabels_${WIDGET_UNIQUE_ID}"></div>
+            </div>
+
+            <!-- 설정 모달 -->
+            <div id="settingsModal_${WIDGET_UNIQUE_ID}" class="water-modal">
+                <div class="water-modal-content">
+                    <div class="water-modal-header">
+                        <h3>Settings</h3>
+                        <button class="water-close-btn" data-widget="${WIDGET_UNIQUE_ID}">&times;</button>
+                    </div>
+                    
+                    <div class="water-modal-body">
+                        <div class="water-settings-section">
+                            <h4>Daily Goal</h4>
+                            
+                            <div class="water-setting-item">
+                                <label for="goalInput_${WIDGET_UNIQUE_ID}">Target Amount</label>
+                                <div class="water-input-group">
+                                    <input type="number" id="goalInput_${WIDGET_UNIQUE_ID}" min="500" max="5000" step="100" value="2000">
+                                    <span>ml</span>
+                                </div>
+                            </div>
+
+                            <div class="water-setting-item">
+                                <label for="cupSize_${WIDGET_UNIQUE_ID}">Cup Size</label>
+                                <div class="water-input-group">
+                                    <input type="number" id="cupSize_${WIDGET_UNIQUE_ID}" min="50" max="500" step="50" value="250">
+                                    <span>ml</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="water-settings-section">
+                            <h4>Display Options</h4>
+                            <div class="water-setting-item">
+                                <label for="showStats_${WIDGET_UNIQUE_ID}">Show Weekly Stats</label>
+                                <input type="checkbox" id="showStats_${WIDGET_UNIQUE_ID}" class="water-toggle-switch">
+                            </div>
+                            <div class="water-setting-item">
+                                <label for="notifications_${WIDGET_UNIQUE_ID}">Enable Reminders</label>
+                                <input type="checkbox" id="notifications_${WIDGET_UNIQUE_ID}" class="water-toggle-switch">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="water-modal-footer">
+                        <button class="water-save-btn" data-widget="${WIDGET_UNIQUE_ID}">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 변수 선언
+        let currentAmount = 0;
+        let goalAmount = 2000;
+        let cupSize = 250;
+        let showStats = false;
+        let lastResetDate = new Date().toDateString();
+        let currentWeekOffset = 0;
+
+        // DOM 요소
+        const water = document.getElementById(`water_${WIDGET_UNIQUE_ID}`);
+        const amountDisplay = document.getElementById(`amountDisplay_${WIDGET_UNIQUE_ID}`);
+        const status = document.getElementById(`status_${WIDGET_UNIQUE_ID}`);
+        const celebration = document.getElementById(`celebration_${WIDGET_UNIQUE_ID}`);
+        const statsBox = document.getElementById(`statsBox_${WIDGET_UNIQUE_ID}`);
+        const settingsModal = document.getElementById(`settingsModal_${WIDGET_UNIQUE_ID}`);
+        const chart = document.getElementById(`chart_${WIDGET_UNIQUE_ID}`);
+        const chartLabels = document.getElementById(`chartLabels_${WIDGET_UNIQUE_ID}`);
+        const weekDisplay = document.getElementById(`weekDisplay_${WIDGET_UNIQUE_ID}`);
+
+        // 데이터 로드
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    currentAmount = data.currentAmount || 0;
+                    goalAmount = data.goalAmount || 2000;
+                    cupSize = data.cupSize || 250;
+                    showStats = data.showStats || false;
+                    lastResetDate = data.lastResetDate || new Date().toDateString();
+                    
+                    // 날짜 체크
+                    if (lastResetDate !== new Date().toDateString()) {
+                        saveHistory();
+                        currentAmount = 0;
+                        lastResetDate = new Date().toDateString();
+                        saveData();
+                    }
+                    
+                    document.getElementById(`goalInput_${WIDGET_UNIQUE_ID}`).value = goalAmount;
+                    document.getElementById(`cupSize_${WIDGET_UNIQUE_ID}`).value = cupSize;
+                    document.getElementById(`showStats_${WIDGET_UNIQUE_ID}`).checked = showStats;
+                    
+                    if (showStats) {
+                        statsBox.classList.add('active');
+                        drawChart();
+                    }
+                } catch(e) {
+                    console.error('Failed to load data:', e);
+                }
+            }
+            updateDisplay();
+        }
+
+        // 데이터 저장
+        function saveData() {
+            const data = {
+                currentAmount,
+                goalAmount,
+                cupSize,
+                showStats,
+                lastResetDate
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // 히스토리 저장
+        function saveHistory() {
+            if (currentAmount > 0) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const dateStr = yesterday.toISOString().slice(0, 10);
+                history[dateStr] = currentAmount;
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            }
+        }
+
+        // 날짜 함수
+        function getMonday(date, weekOffset = 0) {
+            const d = new Date(date);
+            d.setDate(d.getDate() + (weekOffset * 7));
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        // 주 표시 텍스트
+        function getWeekDisplayText() {
+            if (currentWeekOffset === 0) return 'This Week';
+            if (currentWeekOffset === -1) return 'Last Week';
+            if (currentWeekOffset === 1) return 'Next Week';
+            
+            const monday = getMonday(new Date(), currentWeekOffset);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            return `${monday.getMonth()+1}/${monday.getDate()} - ${sunday.getMonth()+1}/${sunday.getDate()}`;
+        }
+
+        // 차트 그리기
+        function drawChart() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+            chart.innerHTML = '';
+            chartLabels.innerHTML = '';
+            
+            const today = new Date();
+            const monday = getMonday(today, currentWeekOffset);
+            
+            // 주 표시 업데이트
+            weekDisplay.textContent = getWeekDisplayText();
+            
+            // 버튼 활성화/비활성화
+            const prevBtn = document.querySelector(`.water-prev-week[data-widget="${WIDGET_UNIQUE_ID}"]`);
+            const nextBtn = document.querySelector(`.water-next-week[data-widget="${WIDGET_UNIQUE_ID}"]`);
+            nextBtn.disabled = currentWeekOffset >= 1;
+            prevBtn.disabled = currentWeekOffset <= -4;
+            
+            let maxAmount = goalAmount;
+            const weekData = [];
+            
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const dateStr = d.toISOString().slice(0, 10);
+                let amount = history[dateStr] || 0;
+                
+                if (d.toDateString() === today.toDateString()) {
+                    amount = currentAmount;
+                }
+                
+                maxAmount = Math.max(maxAmount, amount);
+                
+                weekData.push({
+                    date: `${d.getMonth() + 1}/${d.getDate()}`,
+                    amount: amount,
+                    percentage: (amount / goalAmount) * 100,
+                    isToday: d.toDateString() === today.toDateString(),
+                    isFuture: d > today
+                });
+            }
+            
+            weekData.forEach(data => {
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'water-bar-wrapper';
+                
+                const barValue = document.createElement('div');
+                barValue.className = 'water-bar-value';
+                if (data.amount > 0) {
+                    barValue.textContent = `${(data.amount/1000).toFixed(1)}L`;
+                }
+                barWrapper.appendChild(barValue);
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'water-bar-container';
+                
+                const bar = document.createElement('div');
+                bar.className = 'water-bar';
+                const height = data.amount > 0 ? Math.max((data.amount / maxAmount) * 100, 5) : 0;
+                bar.style.height = `${height}%`;
+                
+                if (data.percentage >= 100) {
+                    bar.style.background = '#4ade80';
+                } else if (data.isToday) {
+                    bar.style.background = '#2563eb';
+                } else if (data.isFuture) {
+                    bar.style.background = '#ddd';
+                }
+                
+                bar.title = `${data.date}: ${(data.amount/1000).toFixed(1)}L (${Math.round(data.percentage)}%)`;
+                barContainer.appendChild(bar);
+                barWrapper.appendChild(barContainer);
+                chart.appendChild(barWrapper);
+                
+                const labelContainer = document.createElement('div');
+                labelContainer.className = 'water-label-container';
+                const label = document.createElement('span');
+                label.textContent = data.date;
+                label.style.fontWeight = data.isToday ? 'bold' : 'normal';
+                label.style.color = data.isToday ? '#2563eb' : '#888';
+                labelContainer.appendChild(label);
+                chartLabels.appendChild(labelContainer);
+            });
+        }
+
+        // 디스플레이 업데이트
+        function updateDisplay() {
+            const percentage = Math.min((currentAmount / goalAmount) * 100, 150);
+            const waterHeight = Math.min((currentAmount / goalAmount) * 100, 100);
+            
+            water.style.height = `${waterHeight}%`;
+            amountDisplay.textContent = `${(currentAmount/1000).toFixed(1)}L`;
+            
+            if (percentage >= 100) {
+                status.textContent = '● Goal Achieved!';
+                status.style.color = '#4ade80';
+            } else {
+                const remaining = goalAmount - currentAmount;
+                status.textContent = `● ${remaining}ml to go`;
+                status.style.color = '#16b8f3';
+            }
+            
+            if (statsBox.classList.contains('active')) {
+                drawChart();
+            }
+        }
+
+        // 물 추가
+        function addWater() {
+            const prevPercentage = (currentAmount / goalAmount) * 100;
+            currentAmount = Math.min(currentAmount + cupSize, goalAmount * 1.5);
+            const newPercentage = (currentAmount / goalAmount) * 100;
+            
+            if (prevPercentage < 100 && newPercentage >= 100) {
+                showCelebration();
+            }
+            
+            updateDisplay();
+            saveData();
+        }
+
+        // 물 제거
+        function removeWater() {
+            currentAmount = Math.max(currentAmount - cupSize, 0);
+            updateDisplay();
+            saveData();
+        }
+
+        // 초기화 함수
+        function resetWater() {
+            if (confirm('Reset today\'s progress?')) {
+                if (currentAmount > 0) {
+                    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+                    const todayStr = new Date().toISOString().slice(0, 10);
+                    history[todayStr] = currentAmount;
+                    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+                }
+                
+                currentAmount = 0;
+                updateDisplay();
+                saveData();
+            }
+        }
+
+        // 축하 애니메이션
+        function showCelebration() {
+            celebration.classList.add('show');
+            setTimeout(() => celebration.classList.remove('show'), 1000);
+        }
+
+        // 이벤트 리스너 - 위젯별로 구분
+        document.querySelector(`.water-add-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = addWater;
+        document.querySelector(`.water-minus-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = removeWater;
+        document.querySelector(`.water-reset-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = resetWater;
+
+        // 주 이동 버튼
+        document.querySelector(`.water-prev-week[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = () => {
+            currentWeekOffset--;
+            drawChart();
+        };
+
+        document.querySelector(`.water-next-week[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = () => {
+            currentWeekOffset++;
+            drawChart();
+        };
+
+        // 설정 모달
+        document.querySelector(`.water-settings-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = () => {
+            settingsModal.classList.add('show');
+        };
+
+        document.querySelector(`.water-close-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = () => {
+            settingsModal.classList.remove('show');
+        };
+
+        document.querySelector(`.water-save-btn[data-widget="${WIDGET_UNIQUE_ID}"]`).onclick = () => {
+            goalAmount = parseInt(document.getElementById(`goalInput_${WIDGET_UNIQUE_ID}`).value);
+            cupSize = parseInt(document.getElementById(`cupSize_${WIDGET_UNIQUE_ID}`).value);
+            showStats = document.getElementById(`showStats_${WIDGET_UNIQUE_ID}`).checked;
+            
+            if (showStats) {
+                statsBox.classList.add('active');
+                drawChart();
+            } else {
+                statsBox.classList.remove('active');
+            }
+            
+            updateDisplay();
+            saveData();
+            settingsModal.classList.remove('show');
+        };
+
+        // 모달 외부 클릭
+        settingsModal.onclick = (event) => {
+            if (event.target === settingsModal) {
+                settingsModal.classList.remove('show');
+            }
+        };
+
+        // 자정 체크
+        const midnightCheck = setInterval(() => {
+            const now = new Date().toDateString();
+            if (lastResetDate !== now) {
+                saveHistory();
+                currentAmount = 0;
+                lastResetDate = now;
+                updateDisplay();
+                saveData();
+            }
+        }, 60000);
+
+        // 초기화
+        loadData();
+    })();
+    </script>
+</body>
+</html>
