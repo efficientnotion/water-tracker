@@ -2,423 +2,403 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>물 마시기 트래커</title>
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #60a5fa;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --bg-color: #eff6ff;
+            --widget-bg: #ffffff;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            /* 노션 임베드 시 전체 화면을 채우도록 설정 */
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: #f8fafc;
+            height: 100vh;
         }
         
-        .container {
-            background: white;
-            border-radius: 24px;
-            padding: 32px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            width: 320px;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        
-        .title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-        
-        .date {
-            font-size: 14px;
-            color: #94a3b8;
-        }
-        
-        .bottle-wrapper {
+        .widget-container {
             position: relative;
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 32px;
-        }
-        
-        .bottle {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background: #f1f5f9;
-            border-radius: 50%;
+            width: 375px;
+            height: 600px; /* 노션에서 적절한 비율로 조절 가능 */
+            background: var(--widget-bg);
+            border-radius: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
             overflow: hidden;
-            box-shadow: inset 0 0 0 3px #e2e8f0;
+            display: flex;
+            flex-direction: column;
         }
-        
+
         .water {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%);
-            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 0 0 50% 50%;
+            height: 100%;
+            transform: translateY(100%);
+            transition: transform 1.2s cubic-bezier(0.6, 0, 0.2, 1);
+            z-index: 1;
         }
-        
-        .water::before {
-            content: '';
+
+        .water svg {
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: -50%;
             width: 200%;
+            height: 250px;
+        }
+
+        .wave {
+            animation: wave 5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+            transform: translate3d(0, 0, 0);
+        }
+
+        .wave-back {
+            animation: wave-back 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite;
+        }
+
+        @keyframes wave {
+            0% { margin-left: 0; }
+            100% { margin-left: -1600px; }
+        }
+
+        @keyframes wave-back {
+            0% { margin-left: 0; }
+            100% { margin-left: -1600px; }
+        }
+
+        .content-overlay {
+            position: relative;
+            z-index: 2;
+            padding: 30px;
             height: 100%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-            animation: shimmer 3s ease-in-out infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        @keyframes shimmer {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(25%); }
-        }
-        
-        .percentage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 48px;
-            font-weight: 700;
-            color: #1e293b;
-            z-index: 10;
-        }
-        
-        .percentage-sign {
-            font-size: 24px;
-            font-weight: 400;
-            color: #64748b;
-        }
-        
-        .stats {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .current-ml {
+        .header h1 {
             font-size: 20px;
             font-weight: 600;
-            color: #1e293b;
         }
         
-        .goal-ml {
-            font-size: 16px;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-        
-        .cups-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 24px;
-        }
-        
-        .cup-btn {
-            aspect-ratio: 1;
-            border: 2px solid #e2e8f0;
-            background: white;
+        .settings-btn {
+            background: transparent;
+            border: 1px solid #e2e8f0;
             border-radius: 12px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 20px;
+            color: var(--text-secondary);
+            transition: background .2s ease;
+        }
+        .settings-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .stats-display {
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .current-amount {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .current-amount span {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .remaining-amount {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-top: 12px;
+        }
+
+        .add-section {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-        }
-        
-        .cup-btn:hover {
-            border-color: #cbd5e1;
-            transform: translateY(-2px);
-        }
-        
-        .cup-btn.filled {
-            background: #3b82f6;
-            border-color: #3b82f6;
-        }
-        
-        .cup-icon {
-            font-size: 20px;
-        }
-        
-        .cup-btn.filled .cup-icon {
-            filter: brightness(0) invert(1);
-        }
-        
-        .cup-ml {
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-        }
-        
-        .cup-btn.filled .cup-ml {
-            color: white;
-        }
-        
-        .action-buttons {
-            display: flex;
             gap: 12px;
+            margin-bottom: 20px;
         }
         
-        .btn {
-            flex: 1;
-            padding: 12px;
+        .add-btn {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
             border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 14px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
             cursor: pointer;
-            transition: all 0.2s ease;
+            color: var(--primary-color);
+            font-size: 40px;
+            font-weight: 300;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .add-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
+        .add-amount-text {
+            color: var(--text-secondary);
+            font-weight: 500;
         }
-        
-        .btn-primary:hover {
-            background: #2563eb;
-        }
-        
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #64748b;
-        }
-        
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-        
-        .celebration {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 80px;
-            animation: pop 0.6s ease-out;
+
+        /* --- Settings Modal --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
             pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            width: 280px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
         }
         
-        @keyframes pop {
-            0% { 
-                opacity: 0; 
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            50% { 
-                opacity: 1; 
-                transform: translate(-50%, -50%) scale(1.2);
-            }
-            100% { 
-                opacity: 0; 
-                transform: translate(-50%, -50%) scale(1);
-            }
+        .modal-buttons button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
         }
+        .btn-save { background: var(--primary-color); color: white; }
+        .btn-cancel { background: #f1f5f9; color: var(--text-secondary); }
+
     </style>
 </head>
 <body>
-    <div class="container">
+
+<div class="widget-container">
+    <!-- Water background SVG -->
+    <div class="water" id="water">
+        <svg viewBox="0 0 560 100" class="wave">
+            <path d="M 0 100 C 140 100 140 20 280 20 C 420 20 420 100 560 100 Z" fill="rgba(59, 130, 246, 0.7)" />
+        </svg>
+        <svg viewBox="0 0 560 100" class="wave-back">
+            <path d="M 0 20 C 140 20 140 100 280 100 C 420 100 420 20 560 20 Z" fill="rgba(96, 165, 250, 1)" />
+        </svg>
+    </div>
+
+    <!-- UI Content -->
+    <div class="content-overlay">
         <div class="header">
-            <h1 class="title">💧 Daily Water</h1>
-            <div class="date" id="currentDate"></div>
+            <h1>Daily Water</h1>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
         </div>
-        
-        <div class="bottle-wrapper">
-            <div class="bottle">
-                <div class="water" id="water"></div>
-                <div class="percentage">
-                    <span id="percentageValue">0</span><span class="percentage-sign">%</span>
-                </div>
-            </div>
+
+        <div class="stats-display">
+            <div class="current-amount" id="currentAmount">0<span>ml</span></div>
+            <div class="remaining-amount" id="remainingAmount">목표까지 2,000ml 남음</div>
         </div>
-        
-        <div class="stats">
-            <div class="current-ml">
-                <span id="currentAmount">0</span> ml
-            </div>
-            <div class="goal-ml">
-                목표: 2,000 ml
-            </div>
-        </div>
-        
-        <div class="cups-grid" id="cupsGrid">
-            <!-- 동적으로 생성됩니다 -->
-        </div>
-        
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="addCustom()">
-                ➕ 직접 입력
-            </button>
-            <button class="btn btn-secondary" onclick="resetAll()">
-                ↺ 초기화
-            </button>
+
+        <div class="add-section">
+            <button class="add-btn" id="addBtn">+</button>
+            <span class="add-amount-text" id="addAmountText">+ 250ml</span>
         </div>
     </div>
     
-    <script>
-        const STORAGE_KEY = 'waterTracker';
-        const TODAY_KEY = 'waterTrackerDate';
-        const GOAL = 2000;
-        const CUP_SIZE = 250;
-        const NUM_CUPS = 8;
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <h2>목표 섭취량 설정</h2>
+            <input type="number" id="goalInput" placeholder="예: 2500">
+            <div class="modal-buttons">
+                <button class="btn-cancel" id="cancelBtn">취소</button>
+                <button class="btn-save" id="saveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const STORAGE_KEY = 'waterTracker_v2';
+    const TODAY_KEY = 'waterTrackerDate_v2';
+
+    // DOM Elements
+    const water = document.getElementById('water');
+    const currentAmountEl = document.getElementById('currentAmount');
+    const remainingAmountEl = document.getElementById('remainingAmount');
+    const addBtn = document.getElementById('addBtn');
+    const addAmountText = document.getElementById('addAmountText');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const modal = document.getElementById('settingsModal');
+    const goalInput = document.getElementById('goalInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    // State
+    let state = {
+        current: 0,
+        goal: 2000,
+        cupSize: 250
+    };
+
+    function formatNumber(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function updateDisplay() {
+        const { current, goal } = state;
+        const remaining = Math.max(goal - current, 0);
+        const percentage = Math.min((current / goal) * 100, 100);
+
+        // Update text
+        currentAmountEl.innerHTML = `${formatNumber(current)}<span>ml</span>`;
+        remainingAmountEl.textContent = `목표까지 ${formatNumber(remaining)}ml 남음`;
         
-        let state = {
-            current: 0,
-            cups: Array(NUM_CUPS).fill(false)
-        };
+        // Update water level
+        // 100% 달성 시 translateY(0%), 0%일 때 translateY(100%)
+        const waterLevel = 100 - percentage;
+        water.style.transform = `translateY(${waterLevel}%)`;
         
-        function init() {
-            loadState();
-            checkNewDay();
-            updateDate();
-            renderCups();
-            updateDisplay();
-        }
-        
-        function updateDate() {
-            const date = new Date();
-            const options = { month: 'long', day: 'numeric', weekday: 'short' };
-            document.getElementById('currentDate').textContent = 
-                date.toLocaleDateString('ko-KR', options);
-        }
-        
-        function checkNewDay() {
-            const today = new Date().toDateString();
-            const savedDate = localStorage.getItem(TODAY_KEY);
-            
-            if (savedDate !== today) {
-                state = {
-                    current: 0,
-                    cups: Array(NUM_CUPS).fill(false)
-                };
-                localStorage.setItem(TODAY_KEY, today);
-                saveState();
-            }
-        }
-        
-        function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-        
-        function loadState() {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                state = JSON.parse(saved);
-            }
-        }
-        
-        function renderCups() {
-            const grid = document.getElementById('cupsGrid');
-            grid.innerHTML = '';
-            
-            state.cups.forEach((filled, index) => {
-                const cup = document.createElement('button');
-                cup.className = `cup-btn ${filled ? 'filled' : ''}`;
-                cup.onclick = () => toggleCup(index);
-                cup.innerHTML = `
-                    <div class="cup-icon">🥤</div>
-                    <div class="cup-ml">${CUP_SIZE}ml</div>
-                `;
-                grid.appendChild(cup);
-            });
-        }
-        
-        function toggleCup(index) {
-            if (state.cups[index]) {
-                // 채워진 컵 클릭: 해당 컵부터 비우기
-                for (let i = index; i < NUM_CUPS; i++) {
-                    if (state.cups[i]) {
-                        state.cups[i] = false;
-                        state.current -= CUP_SIZE;
-                    }
-                }
-            } else {
-                // 빈 컵 클릭: 처음부터 해당 컵까지 채우기
-                for (let i = 0; i <= index; i++) {
-                    if (!state.cups[i]) {
-                        state.cups[i] = true;
-                        state.current += CUP_SIZE;
-                    }
-                }
-            }
-            
+        // Update Add button text
+        addAmountText.textContent = `+ ${state.cupSize}ml`;
+    }
+
+    function addWater() {
+        state.current = Math.min(state.current + state.cupSize, state.goal);
+        saveState();
+        updateDisplay();
+    }
+    
+    // --- Modal Logic ---
+    function openSettings() {
+        goalInput.value = state.goal;
+        modal.classList.add('visible');
+    }
+
+    function closeSettings() {
+        modal.classList.remove('visible');
+    }
+
+    function saveSettings() {
+        const newGoal = parseInt(goalInput.value);
+        if (newGoal && newGoal > 0) {
+            state.goal = newGoal;
             saveState();
-            renderCups();
             updateDisplay();
-            
-            if (state.current >= GOAL) {
-                celebrate();
+            closeSettings();
+        } else {
+            alert('올바른 목표량을 입력해주세요.');
+        }
+    }
+
+    // --- State & Storage ---
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+        const savedState = localStorage.getItem(STORAGE_KEY);
+        if (savedState) {
+            state = JSON.parse(savedState);
+        }
+    }
+    
+    function checkNewDay() {
+        const today = new Date().toDateString();
+        const savedDate = localStorage.getItem(TODAY_KEY);
+        if (savedDate !== today) {
+            state.current = 0; // 목표량은 유지하고 섭취량만 초기화
+            localStorage.setItem(TODAY_KEY, today);
+            saveState();
+        }
+    }
+    
+    function init() {
+        loadState();
+        checkNewDay();
+        updateDisplay();
+        
+        // Event Listeners
+        addBtn.addEventListener('click', addWater);
+        settingsBtn.addEventListener('click', openSettings);
+        saveBtn.addEventListener('click', saveSettings);
+        cancelBtn.addEventListener('click', closeSettings);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeSettings();
             }
-        }
-        
-        function updateDisplay() {
-            const percentage = Math.min(Math.round((state.current / GOAL) * 100), 100);
-            const waterHeight = Math.min((state.current / GOAL) * 100, 100);
-            
-            document.getElementById('water').style.height = waterHeight + '%';
-            document.getElementById('percentageValue').textContent = percentage;
-            document.getElementById('currentAmount').textContent = state.current.toLocaleString();
-        }
-        
-        function addCustom() {
-            const amount = prompt('마신 물의 양을 입력하세요 (ml):', '200');
-            if (amount && !isNaN(amount) && amount > 0) {
-                state.current += parseInt(amount);
-                
-                // 컵 상태 업데이트
-                const filledCups = Math.min(Math.floor(state.current / CUP_SIZE), NUM_CUPS);
-                for (let i = 0; i < filledCups; i++) {
-                    state.cups[i] = true;
-                }
-                for (let i = filledCups; i < NUM_CUPS; i++) {
-                    state.cups[i] = false;
-                }
-                
-                saveState();
-                renderCups();
-                updateDisplay();
-                
-                if (state.current >= GOAL) {
-                    celebrate();
-                }
-            }
-        }
-        
-        function resetAll() {
-            if (confirm('정말 초기화하시겠습니까?')) {
-                state.current = 0;
-                state.cups = Array(NUM_CUPS).fill(false);
-                saveState();
-                renderCups();
-                updateDisplay();
-            }
-        }
-        
-        function celebrate() {
-            const emoji = document.createElement('div');
-            emoji.className = 'celebration';
-            emoji.textContent = '🎉';
-            document.body.appendChild(emoji);
-            
-            setTimeout(() => emoji.remove(), 600);
-        }
-        
-        init();
-    </script>
+        });
+    }
+
+    init();
+</script>
+
 </body>
 </html>
