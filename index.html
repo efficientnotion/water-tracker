@@ -37,7 +37,6 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            min-width: 260px;
         }
 
         /* 설정 버튼 - 포모도로와 동일 */
@@ -154,30 +153,6 @@
             border-color: #16b8f3;
         }
 
-        /* 빠른 추가 버튼들 */
-        .quick-add {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .quick-btn {
-            padding: 6px 12px;
-            border: 1px solid #e5e5e5;
-            border-radius: 8px;
-            background: #fff;
-            color: #666;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .quick-btn:hover {
-            background: #f9f9f9;
-            border-color: #16b8f3;
-            color: #16b8f3;
-        }
-
         /* 통계 박스 - 포모도로 차트 박스와 동일한 스타일 */
         .stats-box {
             background: #fff;
@@ -213,6 +188,27 @@
             font-weight: 600;
         }
 
+        .nav-btn {
+            background: #2563eb;
+            color: #fff;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.1rem;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
         /* 주간 차트 */
         .chart {
             display: flex;
@@ -222,12 +218,29 @@
             padding: 0 8px;
         }
 
+        .bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar-value {
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 500;
+            min-height: 16px;
+        }
+
         .bar-container {
             flex: 1;
+            width: 100%;
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            height: 100%;
         }
 
         .bar {
@@ -470,6 +483,11 @@
                 transform: translate(-50%, -50%) scale(1) rotate(0deg); 
             }
         }
+
+        .week-display {
+            font-size: 0.9rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -490,22 +508,18 @@
             </div>
 
             <div class="controls">
-                <button id="addBtn" title="Add 250ml">&#43;</button>
-                <button id="minusBtn" title="Remove 250ml">&#8722;</button>
+                <button id="addBtn" title="Add water">&#43;</button>
+                <button id="minusBtn" title="Remove water">&#8722;</button>
                 <button id="resetBtn" title="Reset">&#8635;</button>
-            </div>
-
-            <div class="quick-add">
-                <button class="quick-btn" data-amount="100">100ml</button>
-                <button class="quick-btn" data-amount="250">250ml</button>
-                <button class="quick-btn" data-amount="500">500ml</button>
             </div>
         </div>
 
         <!-- 통계 박스 -->
         <div class="stats-box" id="statsBox">
             <div class="stats-header">
-                <span>Weekly Hydration</span>
+                <button class="nav-btn" id="prevWeek">&#8592;</button>
+                <span class="week-display" id="weekDisplay">This Week</span>
+                <button class="nav-btn" id="nextWeek">&#8594;</button>
             </div>
             <div class="chart" id="chart"></div>
             <div class="chart-labels" id="chartLabels"></div>
@@ -533,7 +547,7 @@
                     </div>
 
                     <div class="setting-item">
-                        <label for="cupSize">Default Cup Size</label>
+                        <label for="cupSize">Cup Size</label>
                         <div class="input-group">
                             <input type="number" id="cupSize" min="50" max="500" step="50" value="250">
                             <span>ml</span>
@@ -567,6 +581,7 @@
         let cupSize = 250;
         let showStats = false;
         let lastResetDate = new Date().toDateString();
+        let currentWeekOffset = 0; // 0 = 이번 주, -1 = 지난 주, 1 = 다음 주
 
         // DOM 요소
         const water = document.getElementById('water');
@@ -577,6 +592,9 @@
         const settingsModal = document.getElementById('settingsModal');
         const chart = document.getElementById('chart');
         const chartLabels = document.getElementById('chartLabels');
+        const weekDisplay = document.getElementById('weekDisplay');
+        const prevWeekBtn = document.getElementById('prevWeek');
+        const nextWeekBtn = document.getElementById('nextWeek');
 
         // 데이터 로드
         function loadData() {
@@ -623,18 +641,35 @@
 
         // 히스토리 저장
         function saveHistory() {
-            const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
-            const dateStr = new Date().toISOString().slice(0, 10);
-            history[dateStr] = currentAmount;
-            localStorage.setItem('waterHistory', JSON.stringify(history));
+            if (currentAmount > 0) {
+                const history = JSON.parse(localStorage.getItem('waterHistory') || '{}');
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const dateStr = yesterday.toISOString().slice(0, 10);
+                history[dateStr] = currentAmount;
+                localStorage.setItem('waterHistory', JSON.stringify(history));
+            }
         }
 
         // 날짜 함수
-        function getThisMonday(date) {
+        function getMonday(date, weekOffset = 0) {
             const d = new Date(date);
+            d.setDate(d.getDate() + (weekOffset * 7));
             const day = d.getDay();
             const diff = d.getDate() - day + (day === 0 ? -6 : 1);
             return new Date(d.setDate(diff));
+        }
+
+        // 주 표시 텍스트
+        function getWeekDisplayText() {
+            if (currentWeekOffset === 0) return 'This Week';
+            if (currentWeekOffset === -1) return 'Last Week';
+            if (currentWeekOffset === 1) return 'Next Week';
+            
+            const monday = getMonday(new Date(), currentWeekOffset);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            return `${monday.getMonth()+1}/${monday.getDate()} - ${sunday.getMonth()+1}/${sunday.getDate()}`;
         }
 
         // 차트 그리기
@@ -644,7 +679,14 @@
             chartLabels.innerHTML = '';
             
             const today = new Date();
-            const monday = getThisMonday(today);
+            const monday = getMonday(today, currentWeekOffset);
+            
+            // 주 표시 업데이트
+            weekDisplay.textContent = getWeekDisplayText();
+            
+            // 버튼 활성화/비활성화
+            nextWeekBtn.disabled = currentWeekOffset >= 1;
+            prevWeekBtn.disabled = currentWeekOffset <= -4; // 4주 전까지만
             
             let maxAmount = goalAmount;
             const weekData = [];
@@ -653,36 +695,60 @@
                 const d = new Date(monday);
                 d.setDate(monday.getDate() + i);
                 const dateStr = d.toISOString().slice(0, 10);
-                const amount = history[dateStr] || (d.toDateString() === today.toDateString() ? currentAmount : 0);
+                let amount = history[dateStr] || 0;
+                
+                // 오늘 날짜면 현재 amount 사용
+                if (d.toDateString() === today.toDateString()) {
+                    amount = currentAmount;
+                }
+                
                 maxAmount = Math.max(maxAmount, amount);
                 
                 weekData.push({
                     date: `${d.getMonth() + 1}/${d.getDate()}`,
                     amount: amount,
                     percentage: (amount / goalAmount) * 100,
-                    isToday: d.toDateString() === today.toDateString()
+                    isToday: d.toDateString() === today.toDateString(),
+                    isFuture: d > today
                 });
             }
             
             weekData.forEach(data => {
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'bar-wrapper';
+                
+                // 용량 표시
+                const barValue = document.createElement('div');
+                barValue.className = 'bar-value';
+                if (data.amount > 0) {
+                    barValue.textContent = `${(data.amount/1000).toFixed(1)}L`;
+                }
+                barWrapper.appendChild(barValue);
+                
+                // 막대 컨테이너
                 const barContainer = document.createElement('div');
                 barContainer.className = 'bar-container';
                 
                 const bar = document.createElement('div');
                 bar.className = 'bar';
-                const height = (data.amount / maxAmount) * 100;
+                const height = data.amount > 0 ? Math.max((data.amount / maxAmount) * 100, 5) : 0;
                 bar.style.height = `${height}%`;
                 
+                // 색상 설정
                 if (data.percentage >= 100) {
                     bar.style.background = '#4ade80';
                 } else if (data.isToday) {
                     bar.style.background = '#2563eb';
+                } else if (data.isFuture) {
+                    bar.style.background = '#ddd';
                 }
                 
                 bar.title = `${data.date}: ${(data.amount/1000).toFixed(1)}L (${Math.round(data.percentage)}%)`;
                 barContainer.appendChild(bar);
-                chart.appendChild(barContainer);
+                barWrapper.appendChild(barContainer);
+                chart.appendChild(barWrapper);
                 
+                // 날짜 라벨
                 const labelContainer = document.createElement('div');
                 labelContainer.className = 'label-container';
                 const label = document.createElement('span');
@@ -717,9 +783,9 @@
         }
 
         // 물 추가
-        function addWater(amount = cupSize) {
+        function addWater() {
             const prevPercentage = (currentAmount / goalAmount) * 100;
-            currentAmount = Math.min(currentAmount + amount, goalAmount * 1.5);
+            currentAmount = Math.min(currentAmount + cupSize, goalAmount * 1.5);
             const newPercentage = (currentAmount / goalAmount) * 100;
             
             if (prevPercentage < 100 && newPercentage >= 100) {
@@ -731,8 +797,8 @@
         }
 
         // 물 제거
-        function removeWater(amount = cupSize) {
-            currentAmount = Math.max(currentAmount - amount, 0);
+        function removeWater() {
+            currentAmount = Math.max(currentAmount - cupSize, 0);
             updateDisplay();
             saveData();
         }
@@ -757,10 +823,16 @@
         document.getElementById('minusBtn').onclick = () => removeWater();
         document.getElementById('resetBtn').onclick = resetWater;
 
-        // 빠른 추가 버튼
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.onclick = () => addWater(parseInt(btn.dataset.amount));
-        });
+        // 주 이동 버튼
+        prevWeekBtn.onclick = () => {
+            currentWeekOffset--;
+            drawChart();
+        };
+
+        nextWeekBtn.onclick = () => {
+            currentWeekOffset++;
+            drawChart();
+        };
 
         // 설정 모달
         document.getElementById('settingsBtn').onclick = () => {
