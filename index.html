@@ -31,4 +31,878 @@
         .widget-box {
             background: #fff;
             border-radius: 18px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08)...
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 설정 버튼 - 포모도로와 동일 */
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .settings-btn:hover {
+            transform: rotate(45deg);
+            color: #666;
+        }
+
+        /* 원형 컨테이너 - 포모도로와 동일한 크기 */
+        .circle-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            margin-top: 20px;
+            margin-bottom: 16px;
+        }
+
+        .circle-bg {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #e5e5e5;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 물 애니메이션 */
+        .water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #16b8f3;
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0 0 50% 50%;
+        }
+
+        .water::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -50%;
+            width: 200%;
+            height: 20px;
+            background: #16b8f3;
+            border-radius: 50%;
+            animation: wave 3s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0) scaleY(1); }
+            50% { transform: translateX(25%) scaleY(0.6); }
+        }
+
+        /* 중앙 디스플레이 */
+        .display-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .amount-display {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .status {
+            color: #16b8f3;
+            margin-top: 8px;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        /* 컨트롤 버튼 - 포모도로와 동일한 스타일 */
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls button {
+            width: 44px;
+            height: 44px;
+            border: 2px solid #eee;
+            border-radius: 50%;
+            background: #fff;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls button:hover {
+            background: #f9f9f9;
+            border-color: #16b8f3;
+        }
+
+        /* 통계 박스 - 포모도로 차트 박스와 동일한 스타일 */
+        .stats-box {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 32px 30px;
+            min-width: 310px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .stats-box.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .nav-btn {
+            background: #2563eb;
+            color: #fff;
+            border-radius: 8px;
+            border: none;
+            font-size: 1.1rem;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .nav-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 주간 차트 */
+        .chart {
+            display: flex;
+            height: 180px;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            padding: 0 8px;
+        }
+
+        .bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar-value {
+            font-size: 0.7rem;
+            color: #666;
+            font-weight: 500;
+            min-height: 16px;
+        }
+
+        .bar-container {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .bar {
+            background: #16b8f3;
+            border-radius: 6px 6px 2px 2px;
+            width: 18px;
+            transition: height 0.4s ease-out;
+        }
+
+        .chart-labels {
+            display: flex;
+            font-size: 0.85rem;
+            color: #888;
+            padding: 0 8px;
+        }
+
+        .label-container {
+            flex: 1;
+            text-align: center;
+        }
+
+        /* 설정 모달 - 포모도로와 동일한 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            animation: fadeIn 0.2s;
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.3rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section h4 {
+            margin: 0 0 16px;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-item label {
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #16b8f3;
+        }
+
+        .input-group span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 12px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch:checked {
+            background: #16b8f3;
+        }
+
+        .toggle-switch::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch:checked::before {
+            transform: translateX(20px);
+        }
+
+        .modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .save-btn {
+            background: #16b8f3;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .save-btn:hover {
+            background: #0ea5e9;
+        }
+
+        /* 축하 애니메이션 */
+        .celebration {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .celebration.show {
+            animation: celebrate 1s ease-out;
+        }
+
+        @keyframes celebrate {
+            0% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(0.5) rotate(-180deg); 
+            }
+            50% { 
+                opacity: 1; 
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg); 
+            }
+            100% { 
+                opacity: 0; 
+                transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+            }
+        }
+
+        .week-display {
+            font-size: 0.9rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" data-widget-id="">
+        <!-- 메인 위젯 -->
+        <div class="widget-box">
+            <button id="settingsBtn" class="settings-btn">&#9881;</button>
+
+            <div class="circle-container">
+                <div class="circle-bg">
+                    <div class="water" id="water"></div>
+                </div>
+                <div class="display-container">
+                    <div class="amount-display" id="amountDisplay">0.0L</div>
+                    <div class="status" id="status">● Daily Goal</div>
+                </div>
+                <div class="celebration" id="celebration">💧</div>
+            </div>
+
+            <div class="controls">
+                <button id="addBtn" title="Add water">&#43;</button>
+                <button id="minusBtn" title="Remove water">&#8722;</button>
+                <button id="resetBtn" title="Reset">&#8635;</button>
+            </div>
+        </div>
+
+        <!-- 통계 박스 -->
+        <div class="stats-box" id="statsBox">
+            <div class="stats-header">
+                <button class="nav-btn" id="prevWeek">&#8592;</button>
+                <span class="week-display" id="weekDisplay">This Week</span>
+                <button class="nav-btn" id="nextWeek">&#8594;</button>
+            </div>
+            <div class="chart" id="chart"></div>
+            <div class="chart-labels" id="chartLabels"></div>
+        </div>
+    </div>
+
+    <!-- 설정 모달 -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-btn" id="closeBtn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Daily Goal</h4>
+                    
+                    <div class="setting-item">
+                        <label for="goalInput">Target Amount</label>
+                        <div class="input-group">
+                            <input type="number" id="goalInput" min="500" max="5000" step="100" value="2000">
+                            <span>ml</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="cupSize">Cup Size</label>
+                        <div class="input-group">
+                            <input type="number" id="cupSize" min="50" max="500" step="50" value="250">
+                            <span>ml</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Display Options</h4>
+                    <div class="setting-item">
+                        <label for="showStats">Show Weekly Stats</label>
+                        <input type="checkbox" id="showStats" class="toggle-switch">
+                    </div>
+                    <div class="setting-item">
+                        <label for="notifications">Enable Reminders</label>
+                        <input type="checkbox" id="notifications" class="toggle-switch">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button id="saveSettings" class="save-btn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // ⭐ 핵심 수정: 위젯별 고유 ID 생성
+        const container = document.querySelector('.container');
+        
+        // 이미 저장된 위젯 ID가 있는지 확인
+        let widgetId = container.dataset.widgetId;
+        
+        if (!widgetId) {
+            // 모든 컨테이너들을 찾아서 현재 위치 확인
+            const allContainers = Array.from(document.querySelectorAll('.container'));
+            const containerIndex = allContainers.indexOf(container);
+            
+            // 페이지 URL + 위젯 위치로 고유 ID 생성
+            widgetId = btoa(window.location.href + '_position_' + containerIndex);
+            container.dataset.widgetId = widgetId;
+        }
+        
+        // 독립적인 저장소 키 생성
+        const STORAGE_KEY = 'waterTrackerData_' + widgetId;
+        const HISTORY_KEY = 'waterHistory_' + widgetId;
+
+        // 변수 선언
+        let currentAmount = 0;
+        let goalAmount = 2000;
+        let cupSize = 250;
+        let showStats = false;
+        let lastResetDate = new Date().toDateString();
+        let currentWeekOffset = 0;
+
+        // DOM 요소
+        const water = document.getElementById('water');
+        const amountDisplay = document.getElementById('amountDisplay');
+        const status = document.getElementById('status');
+        const celebration = document.getElementById('celebration');
+        const statsBox = document.getElementById('statsBox');
+        const settingsModal = document.getElementById('settingsModal');
+        const chart = document.getElementById('chart');
+        const chartLabels = document.getElementById('chartLabels');
+        const weekDisplay = document.getElementById('weekDisplay');
+        const prevWeekBtn = document.getElementById('prevWeek');
+        const nextWeekBtn = document.getElementById('nextWeek');
+
+        // 데이터 로드
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                currentAmount = data.currentAmount || 0;
+                goalAmount = data.goalAmount || 2000;
+                cupSize = data.cupSize || 250;
+                showStats = data.showStats || false;
+                lastResetDate = data.lastResetDate || new Date().toDateString();
+                
+                // 날짜 체크
+                if (lastResetDate !== new Date().toDateString()) {
+                    saveHistory();
+                    currentAmount = 0;
+                    lastResetDate = new Date().toDateString();
+                    saveData();
+                }
+                
+                document.getElementById('goalInput').value = goalAmount;
+                document.getElementById('cupSize').value = cupSize;
+                document.getElementById('showStats').checked = showStats;
+                
+                if (showStats) {
+                    statsBox.classList.add('active');
+                    drawChart();
+                }
+            }
+            updateDisplay();
+        }
+
+        // 데이터 저장
+        function saveData() {
+            const data = {
+                currentAmount,
+                goalAmount,
+                cupSize,
+                showStats,
+                lastResetDate
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // 히스토리 저장
+        function saveHistory() {
+            if (currentAmount > 0) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const dateStr = yesterday.toISOString().slice(0, 10);
+                history[dateStr] = currentAmount;
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            }
+        }
+
+        // 날짜 함수
+        function getMonday(date, weekOffset = 0) {
+            const d = new Date(date);
+            d.setDate(d.getDate() + (weekOffset * 7));
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        // 주 표시 텍스트
+        function getWeekDisplayText() {
+            if (currentWeekOffset === 0) return 'This Week';
+            if (currentWeekOffset === -1) return 'Last Week';
+            if (currentWeekOffset === 1) return 'Next Week';
+            
+            const monday = getMonday(new Date(), currentWeekOffset);
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            return `${monday.getMonth()+1}/${monday.getDate()} - ${sunday.getMonth()+1}/${sunday.getDate()}`;
+        }
+
+        // 차트 그리기
+        function drawChart() {
+            const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+            chart.innerHTML = '';
+            chartLabels.innerHTML = '';
+            
+            const today = new Date();
+            const monday = getMonday(today, currentWeekOffset);
+            
+            weekDisplay.textContent = getWeekDisplayText();
+            
+            nextWeekBtn.disabled = currentWeekOffset >= 1;
+            prevWeekBtn.disabled = currentWeekOffset <= -4;
+            
+            let maxAmount = goalAmount;
+            const weekData = [];
+            
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const dateStr = d.toISOString().slice(0, 10);
+                let amount = history[dateStr] || 0;
+                
+                if (d.toDateString() === today.toDateString()) {
+                    amount = currentAmount;
+                }
+                
+                maxAmount = Math.max(maxAmount, amount);
+                
+                weekData.push({
+                    date: `${d.getMonth() + 1}/${d.getDate()}`,
+                    amount: amount,
+                    percentage: (amount / goalAmount) * 100,
+                    isToday: d.toDateString() === today.toDateString(),
+                    isFuture: d > today
+                });
+            }
+            
+            weekData.forEach(data => {
+                const barWrapper = document.createElement('div');
+                barWrapper.className = 'bar-wrapper';
+                
+                const barValue = document.createElement('div');
+                barValue.className = 'bar-value';
+                if (data.amount > 0) {
+                    barValue.textContent = `${(data.amount/1000).toFixed(1)}L`;
+                }
+                barWrapper.appendChild(barValue);
+                
+                const barContainer = document.createElement('div');
+                barContainer.className = 'bar-container';
+                
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const height = data.amount > 0 ? Math.max((data.amount / maxAmount) * 100, 5) : 0;
+                bar.style.height = `${height}%`;
+                
+                if (data.percentage >= 100) {
+                    bar.style.background = '#4ade80';
+                } else if (data.isToday) {
+                    bar.style.background = '#2563eb';
+                } else if (data.isFuture) {
+                    bar.style.background = '#ddd';
+                }
+                
+                bar.title = `${data.date}: ${(data.amount/1000).toFixed(1)}L (${Math.round(data.percentage)}%)`;
+                barContainer.appendChild(bar);
+                barWrapper.appendChild(barContainer);
+                chart.appendChild(barWrapper);
+                
+                const labelContainer = document.createElement('div');
+                labelContainer.className = 'label-container';
+                const label = document.createElement('span');
+                label.textContent = data.date;
+                label.style.fontWeight = data.isToday ? 'bold' : 'normal';
+                label.style.color = data.isToday ? '#2563eb' : '#888';
+                labelContainer.appendChild(label);
+                chartLabels.appendChild(labelContainer);
+            });
+        }
+
+        // 디스플레이 업데이트
+        function updateDisplay() {
+            const percentage = Math.min((currentAmount / goalAmount) * 100, 150);
+            const waterHeight = Math.min((currentAmount / goalAmount) * 100, 100);
+            
+            water.style.height = `${waterHeight}%`;
+            amountDisplay.textContent = `${(currentAmount/1000).toFixed(1)}L`;
+            
+            if (percentage >= 100) {
+                status.textContent = '● Goal Achieved!';
+                status.style.color = '#4ade80';
+            } else {
+                const remaining = goalAmount - currentAmount;
+                status.textContent = `● ${remaining}ml to go`;
+                status.style.color = '#16b8f3';
+            }
+            
+            if (statsBox.classList.contains('active')) {
+                drawChart();
+            }
+        }
+
+        // 물 추가
+        function addWater() {
+            const prevPercentage = (currentAmount / goalAmount) * 100;
+            currentAmount = Math.min(currentAmount + cupSize, goalAmount * 1.5);
+            const newPercentage = (currentAmount / goalAmount) * 100;
+            
+            if (prevPercentage < 100 && newPercentage >= 100) {
+                showCelebration();
+            }
+            
+            updateDisplay();
+            saveData();
+        }
+
+        // 물 제거
+        function removeWater() {
+            currentAmount = Math.max(currentAmount - cupSize, 0);
+            updateDisplay();
+            saveData();
+        }
+
+        // 초기화 함수
+        function resetWater() {
+            if (currentAmount > 0) {
+                const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '{}');
+                const todayStr = new Date().toISOString().slice(0, 10);
+                history[todayStr] = currentAmount;
+                localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            }
+            
+            currentAmount = 0;
+            updateDisplay();
+            saveData();
+            
+            status.textContent = '● Reset Complete';
+            setTimeout(() => {
+                status.textContent = `● ${goalAmount}ml to go`;
+            }, 1500);
+        }
+
+        // 축하 애니메이션
+        function showCelebration() {
+            celebration.classList.add('show');
+            setTimeout(() => celebration.classList.remove('show'), 1000);
+        }
+
+        // 이벤트 리스너
+        document.getElementById('addBtn').onclick = () => addWater();
+        document.getElementById('minusBtn').onclick = () => removeWater();
+        document.getElementById('resetBtn').onclick = resetWater;
+
+        prevWeekBtn.onclick = () => {
+            currentWeekOffset--;
+            drawChart();
+        };
+
+        nextWeekBtn.onclick = () => {
+            currentWeekOffset++;
+            drawChart();
+        };
+
+        document.getElementById('settingsBtn').onclick = () => {
+            settingsModal.classList.add('show');
+        };
+
+        document.getElementById('closeBtn').onclick = () => {
+            settingsModal.classList.remove('show');
+        };
+
+        document.getElementById('saveSettings').onclick = () => {
+            goalAmount = parseInt(document.getElementById('goalInput').value);
+            cupSize = parseInt(document.getElementById('cupSize').value);
+            showStats = document.getElementById('showStats').checked;
+            
+            if (showStats) {
+                statsBox.classList.add('active');
+                drawChart();
+            } else {
+                statsBox.classList.remove('active');
+            }
+            
+            updateDisplay();
+            saveData();
+            settingsModal.classList.remove('show');
+        };
+
+        window.onclick = (event) => {
+            if (event.target === settingsModal) {
+                settingsModal.classList.remove('show');
+            }
+        };
+
+        // 자정 체크
+        setInterval(() => {
+            const now = new Date().toDateString();
+            if (lastResetDate !== now) {
+                saveHistory();
+                currentAmount = 0;
+                lastResetDate = now;
+                updateDisplay();
+                saveData();
+            }
+        }, 60000);
+
+        // 초기화
+        loadData();
+    })();
+    </script>
+</body>
+</html>
